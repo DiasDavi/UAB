@@ -1,4 +1,5 @@
 name: UAB CI
+
 on:
   push:
     branches:
@@ -19,7 +20,13 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: 17
+          java-version: '17'
 
       - name: Build
         run: ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: uab-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
