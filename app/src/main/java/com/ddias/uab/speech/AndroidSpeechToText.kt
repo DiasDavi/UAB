@@ -13,7 +13,7 @@ class AndroidSpeechToText(
     private val context: Context
 ) : ISpeechToText {
 
-    override suspend fun listenOnce(): SttResult = suspendCancellableCoroutine { continuation ->
+    override suspend fun listenOnce(): ISttResult = suspendCancellableCoroutine { continuation ->
         val speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
 
         speechRecognizer.setRecognitionListener(object : RecognitionListener {
@@ -27,9 +27,9 @@ class AndroidSpeechToText(
                 if (continuation.isActive) {
                     val result = when (error) {
                         SpeechRecognizer.ERROR_NO_MATCH,
-                        SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> SttResult.Silence
+                        SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> ISttResult.Silence
 
-                        else -> SttResult.Error(Exception("Erro STT: $error"))
+                        else -> ISttResult.Error(Exception("Erro STT: $error"))
                     }
                     safeDestroy(speechRecognizer)
                     continuation.resume(result)
@@ -42,9 +42,9 @@ class AndroidSpeechToText(
                     val text = matches?.firstOrNull()
 
                     val result = if (!text.isNullOrBlank()) {
-                        SttResult.Speech(text)
+                        ISttResult.Speech(text)
                     } else {
-                        SttResult.Silence
+                        ISttResult.Silence
                     }
                     safeDestroy(speechRecognizer)
                     continuation.resume(result)
@@ -68,7 +68,7 @@ class AndroidSpeechToText(
         } catch (e: Exception) {
             if (continuation.isActive) {
                 safeDestroy(speechRecognizer)
-                continuation.resume(SttResult.Error(e))
+                continuation.resume(ISttResult.Error(e))
             }
         }
 
@@ -84,10 +84,4 @@ class AndroidSpeechToText(
         } catch (e: Exception) {
         }
     }
-}
-
-sealed interface SttResult {
-    data class Speech(val text: String) : SttResult
-    object Silence : SttResult
-    data class Error(val throwable: Throwable) : SttResult
 }

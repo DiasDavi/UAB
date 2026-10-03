@@ -1,9 +1,8 @@
 package com.ddias.uab.audio
 
 import android.util.Log
-import com.ddias.uab.speech.AndroidSpeechToText
 import com.ddias.uab.speech.ISpeechToText
-import com.ddias.uab.speech.SttResult
+import com.ddias.uab.speech.ISttResult
 import kotlin.time.Duration.Companion.milliseconds
 
 class AudioRecorderManager(
@@ -16,7 +15,7 @@ class AudioRecorderManager(
     suspend fun startLoop(onSpeechDetected: suspend (String) -> Unit) {
         while (true) {
             when (val result = androidSpeechToText.listenOnce()) {
-                is SttResult.Speech -> {
+                is ISttResult.Speech -> {
                     Log.d("AudioRecorderManager", "result: $result")
                     currentSpeech = result.text
 
@@ -24,10 +23,12 @@ class AudioRecorderManager(
 
                     currentSpeech = null
                 }
-                is SttResult.Silence -> {
+
+                is ISttResult.Silence -> {
                     currentSpeech = null
                 }
-                is SttResult.Error -> {
+
+                is ISttResult.Error -> {
                     currentSpeech = null
                     kotlinx.coroutines.delay(1000.milliseconds)
                 }
