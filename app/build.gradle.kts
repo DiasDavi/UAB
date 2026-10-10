@@ -38,7 +38,7 @@ android {
 }
 
 dependencies {
-    implementation(files("libs/ultron-core-0.1.0.jar"))
+    implementation(files("libs/ultron-core-0.1.1.jar"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)

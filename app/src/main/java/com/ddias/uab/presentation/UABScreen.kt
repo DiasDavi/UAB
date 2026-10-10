@@ -1,6 +1,7 @@
 package com.ddias.uab.presentation
 
 import android.Manifest
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -14,8 +15,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,18 +28,19 @@ import com.ddias.uab.R
 import com.ddias.uab.ui.theme.UABTheme
 
 @Composable
-fun UABScreen(
-    isListening: Boolean,
-    response: String,
-    onListen: () -> Unit
-) {
+fun UABScreen(start: suspend () -> Unit) {
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        if (isGranted) {
-            onListen()
+        if (!isGranted) {
+            Log.d("PERMISSIONS", "Permissão de microfone negada.")
         }
+    }
+
+    LaunchedEffect(Unit) {
+        permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+        start()
     }
 
     Column(
@@ -50,15 +52,9 @@ fun UABScreen(
     ) {
 
         IconButton(
-            onClick = {
-                permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-            },
+            onClick = { },
             colors = IconButtonDefaults.iconButtonColors(
-                containerColor = if (isListening) {
-                    Color(0xFF0096FF)
-                } else {
-                    Color(0xFF1434A4)
-                },
+                containerColor = Color(0xFF1434A4),
                 contentColor = Color(0xFFFFFFFF)
             ),
             modifier = Modifier
@@ -73,8 +69,6 @@ fun UABScreen(
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-
-        Text(text = response)
     }
 }
 
@@ -82,10 +76,6 @@ fun UABScreen(
 @Composable
 fun UABScreenPreview() {
     UABTheme {
-        UABScreen(
-            isListening = false,
-            response = "",
-            onListen = {}
-        )
+        UABScreen(start = {})
     }
 }

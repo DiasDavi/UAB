@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.ddias.uab.audio.AudioRecorderManager
+import com.ddias.uab.audio.WakeWordManager
 import com.ddias.uab.presentation.UABScreen
 import com.ddias.uab.presentation.UABViewModel
 import com.ddias.uab.speech.AndroidSpeechToText
@@ -23,18 +25,16 @@ class MainActivity : ComponentActivity() {
         val androidSpeechToText: ISpeechToText = AndroidSpeechToText(this)
         val androidTextToSpeech: ITextToSpeech = AndroidTextToSpeech(this)
 
-        val vm = UABViewModel(core, androidSpeechToText, androidTextToSpeech)
+        val audioRecorderManager = AudioRecorderManager(androidSpeechToText)
+        val wakeWordManager = WakeWordManager(core, androidTextToSpeech)
 
-
+        val vm = UABViewModel(audioRecorderManager, wakeWordManager)
 
         setContent {
             UABTheme {
-                UABScreen(
-                    isListening = vm.isListening,
-                    response = vm.response,
-                    onListen = vm::startToListen
-                )
+                UABScreen(start = vm::start)
             }
         }
     }
 }
+
